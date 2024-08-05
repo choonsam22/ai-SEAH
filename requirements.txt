@@ -18,5 +18,4 @@ tiktoken==0.5.2
 yfinance==0.2.40
 streamlit==1.25.0
 pdfplumber==0.10.1
-python-dotenv==1.0.0
 pandas==2.1.1
