@@ -2,7 +2,6 @@ import os
 import streamlit as st
 import pdfplumber
 from langchain.chat_models import ChatOpenAI
-from dotenv import load_env
 
 # 환경 변수 로드
 os.environ["OPENAI_API_KEY"] = "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"
