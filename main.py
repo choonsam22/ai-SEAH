@@ -1,7 +1,6 @@
 import os
 import streamlit as st
 import pdfplumber
-from dotenv import load_dotenv
 from langchain.chat_models import ChatOpenAI
 
 # 환경 변수 로드
