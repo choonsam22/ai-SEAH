@@ -7,7 +7,7 @@ from langchain.chat_models import ChatOpenAI
 
 
 # OpenAI API 키를 직접 설정
-OPENAI_API_KEY = "sk-z2Ll-p66HR7tT4OdE1OsiMRISDe2YMuGewXyiA9uuhT3BlbkFJuy83fC0YV6FPXzoNvhudkqEFWUnk_fGSs7PTALCoEA"  # 여기에 실제 API 키를 입력하세요
+OPENAI_API_KEY="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"
 
 # PDFPlumberTool 정의
 class PDFPlumberTool:
