@@ -25,7 +25,7 @@ class PDFPlumberTool:
 def summarize_pdf_content(pdf_text):
     llm = ChatOpenAI(
         api_key=OPENAI_API_KEY, 
-        model="gpt-3.5",
+        model="gpt-4",
         temperature=0.5,
         max_tokens=1000,
         )
