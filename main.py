@@ -9,6 +9,7 @@ from langchain.chat_models import ChatOpenAI
 # OpenAI API 키를 직접 설정
 OPENAI_API_KEY="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"
 
+
 # PDFPlumberTool 정의
 class PDFPlumberTool:
     def __init__(self, pdf_path):
