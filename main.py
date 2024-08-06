@@ -1,14 +1,12 @@
 import os
 import streamlit as st
 import pdfplumber
-from PIL import Image
-import pytesseract
+from dotenv import load_dotenv
 from langchain.chat_models import ChatOpenAI
 
-
-# OpenAI API 키를 직접 설정
-OPENAI_API_KEY="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"
-
+# 환경 변수 로드
+load_dotenv()
+os.environ["OPENAI_MODEL_NAME"] = "gpt-4"
 
 # PDFPlumberTool 정의
 class PDFPlumberTool:
@@ -21,15 +19,14 @@ class PDFPlumberTool:
             for page in pdf.pages:
                 pdf_text += page.extract_text() + "\n"
         return pdf_text
-    
+
 # LLM을 사용해 PDF 내용을 정리하는 함수
 def summarize_pdf_content(pdf_text):
     llm = ChatOpenAI(
-        api_key=OPENAI_API_KEY, 
-        model="gpt-3.5-turbo",
-        temperature=0.5,
+        model=os.getenv("OPENAI_MODEL_NAME"),
+        temperature=0.1,
         max_tokens=1000,
-        )
+    )
  
     prompt = f"""
     The most important thing is to keep in mind that there should be no missing content in the file.
@@ -68,9 +65,9 @@ def summarize_pdf_content(pdf_text):
 
 # Streamlit 웹 애플리케이션
 def main():
-    st.title("제조가부 AI")
+    st.title("PDF 요약 도구")
     
-    uploaded_file = st.file_uploader("수요가 Spec 업로드", type="pdf")
+    uploaded_file = st.file_uploader("PDF 파일 업로드", type="pdf")
     
     if uploaded_file is not None:
         pdf_path = uploaded_file.name
