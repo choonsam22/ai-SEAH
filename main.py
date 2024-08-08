@@ -1,15 +1,14 @@
-import os
 import streamlit as st
 import pdfplumber
-from dotenv import load_dotenv
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import PyMuPDFLoader
+from langchain.vectorstores import FAISS
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnablePassthrough
+from langchain_core.prompts import PromptTemplate
 from langchain.chat_models import ChatOpenAI
+from langchain.embeddings.openai import OpenAIEmbeddings
 
-# API 키 정보 로드
-load_dotenv()
-
-# Streamlit의 secrets.toml 파일에서 환경 변수를 가져옴
-openai_api_key = st.secrets["OPENAI_API_KEY"]
-openai_model_name = st.secrets["OPENAI_MODEL_NAME"]
 
 # PDFPlumberTool 정의
 class PDFPlumberTool:
@@ -26,8 +25,7 @@ class PDFPlumberTool:
 # LLM을 사용해 PDF 내용을 정리하는 함수
 def summarize_pdf_content(pdf_text):
     llm = ChatOpenAI(
-        api_key=openai_api_key,
-        model=openai_model_name,    
+        model_name="gpt-4o",
         temperature=0.1,
         max_tokens=1000,
     )
@@ -69,9 +67,9 @@ def summarize_pdf_content(pdf_text):
 
 # Streamlit 웹 애플리케이션
 def main():
-    st.title("PDF 요약 도구")
+    st.title("제조가부 AI")
     
-    uploaded_file = st.file_uploader("PDF 파일 업로드", type="pdf")
+    uploaded_file = st.file_uploader("수요가 Spec 업로드", type="pdf")
     
     if uploaded_file is not None:
         pdf_path = uploaded_file.name
