@@ -1,9 +1,5 @@
 import streamlit as st
 import pdfplumber
-from langchain_community.document_loaders import PyMuPDFLoader
-from langchain.vectorstores import FAISS
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough
 from langchain_core.prompts import PromptTemplate
 from langchain.chat_models import ChatOpenAI
 from langchain.embeddings.openai import OpenAIEmbeddings
