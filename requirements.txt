@@ -5,4 +5,5 @@ langchain-community
 openai
 crewai
 pydantic<2.0
+streamlit==1.10.0
 
