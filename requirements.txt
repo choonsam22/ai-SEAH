@@ -4,3 +4,5 @@ langchain
 langchain-community
 openai
 crewai
+pydantic<2.0
+
