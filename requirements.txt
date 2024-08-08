@@ -1,6 +1,6 @@
 streamlit
 pdfplumber
 langchain
-langchain
 langchain-community
 openai
+crewai
