@@ -1,7 +1,7 @@
 import streamlit as st
 import pdfplumber
 from langchain_core.prompts import PromptTemplate
-from langchain.chat_models import ChatOpenAI
+from langchain_community.chat_models import ChatOpenAI
 from langchain.embeddings.openai import OpenAIEmbeddings
 
 
