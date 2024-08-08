@@ -1,10 +1,8 @@
 import streamlit as st
 import pdfplumber
-import tempfile
 from langchain_core.prompts import PromptTemplate
 from langchain_community.chat_models import ChatOpenAI
 from langchain.embeddings.openai import OpenAIEmbeddings
-from crewai import Crew, Agent, Task
 
 
 # PDFPlumberTool 정의
@@ -62,143 +60,40 @@ def summarize_pdf_content(pdf_text):
     summary = llm.predict(prompt)
     return summary.strip()
 
-# AGENT 정의
-class Agents:
-    def document_comparator(self, summarized_text, comparison_text):
-        return Agent(
-            role="Document Comparator",
-            goal="Compare the summarized content from the uploaded document with another standard document to identify key considerations, discrepancies, and necessary adjustments.",
-            tools=[],  # 도구 사용 없이 직접 작업
-            allow_delegation=False,
-            verbose=True,
-            backstory="""
-            You specialize in comparing client-specific documentation with industry standards.
-            Your role is to identify any discrepancies, necessary adjustments, or key considerations between the uploaded document and the selected standard.
-            """,
-            context={'summarized_text': summarized_text, 'comparison_text': comparison_text}  # 컨텍스트로 요약된 텍스트를 전달
-        )
-
-# 작업 정의
-class Tasks:
-    def compare_with_selected_standard(self, agent):
-        return Task(
-            description="Compare the summarized content from the uploaded document with the selected standard to identify necessary adjustments, discrepancies, and considerations.",
-            expected_output="A detailed comparison report that identifies key considerations, discrepancies, and adjustments needed when aligning the uploaded document with the selected standard.",
-            agent=agent,
-            output_file="comparison_report.md",
-        )
-
-    def final_summary(self, agent, context):
-        return Task(
-            description="Compile the comparison report and other relevant findings into a final summary document.",
-            expected_output="A comprehensive final report that includes the comparison with the selected standard and summarizes necessary adjustments and key considerations.",
-            agent=agent,
-            context=context,
-            output_file="final_summary_with_comparison.md",
-        )
-
-
 # Streamlit 웹 애플리케이션
 def main():
     st.title("제조가부 AI")
+    
+    uploaded_file = st.file_uploader("수요가 Spec 업로드", type="pdf")
+    
+    if uploaded_file is not None:
+        pdf_path = uploaded_file.name
+        with open(pdf_path, "wb") as f:
+            f.write(uploaded_file.getbuffer())
+        
+        st.write("PDF 파일 업로드 완료. 요약 작업을 시작합니다...")
 
-    # 탭 설정
-    tab1, tab2 = st.tabs(["수요가 Spec 요약", "표준 Spec 비교"])
+        # PDF 내용 추출 및 요약
+        pdf_tool = PDFPlumberTool(pdf_path)
+        extracted_text = pdf_tool.extract_text()
+        summarized_text = summarize_pdf_content(extracted_text)
 
-    with tab1:
-        st.header("수요가 Spec 요약")
-        uploaded_file = st.file_uploader("수요가 Spec(pdf)", type="pdf", key="tab1_file_uploader")
+        # 요약된 내용 화면에 표시
+        st.write("요약된 내용:")
+        st.markdown(summarized_text)
 
-        if uploaded_file is not None:
-            # 파일을 이미 처리한 경우 다시 처리하지 않도록 방지
-            if "summarized_text" not in st.session_state:
-                with tempfile.NamedTemporaryFile(delete=False) as temp_pdf:
-                    temp_pdf.write(uploaded_file.getbuffer())
-                    pdf_path = temp_pdf.name
+        # 요약된 내용 저장 및 다운로드 버튼 추가
+        with open("summarized_spec.txt", "w", encoding="utf-8") as file:
+            file.write(summarized_text)
+        
+        st.download_button(
+            label="요약된 내용 다운로드 (Text)",
+            data=summarized_text,
+            file_name="summarized_spec.txt",
+            mime="text/plain"
+        )
 
-                st.write("PDF 파일 업로드 완료. 작업을 시작합니다...")
-
-                # PDF 내용 추출 및 요약
-                pdf_tool = PDFPlumberTool(pdf_path)
-                extracted_text = pdf_tool.extract_text()
-                summarized_text = summarize_pdf_content(extracted_text)
-
-                # 요약된 내용 저장
-                st.session_state["summarized_text"] = summarized_text
-
-            st.write("요약된 내용:")
-            st.text(st.session_state["summarized_text"])
-
-            # 다운로드 버튼 추가
-            st.download_button(
-                label="요약된 내용 다운로드 (Text)",
-                data=st.session_state["summarized_text"],
-                file_name="summarized_spec.txt",
-                mime="text/plain"
-            )
-
-    with tab2:
-        st.header("표준 Spec 비교")
-        uploaded_file = st.file_uploader("수요가 Spec(pdf)", type="pdf", key="tab2_file_uploader_spec")
-        comparison_file = st.file_uploader("표준 Spec(pdf)", type="pdf", key="tab2_file_uploader_comparison")
-
-        if uploaded_file is not None and comparison_file is not None:
-            # 파일을 이미 처리한 경우 다시 처리하지 않도록 방지
-            if "final_summary" not in st.session_state:
-                with tempfile.NamedTemporaryFile(delete=False) as temp_pdf1, tempfile.NamedTemporaryFile(delete=False) as temp_pdf2:
-                    temp_pdf1.write(uploaded_file.getbuffer())
-                    pdf_path = temp_pdf1.name
-
-                    temp_pdf2.write(comparison_file.getbuffer())
-                    comparison_path = temp_pdf2.name
-
-                st.write("PDF 파일 업로드 완료. 표준 문서와의 비교 작업을 시작합니다...")
-
-                # PDF 내용 추출 및 요약
-                pdf_tool = PDFPlumberTool(pdf_path)
-                comparison_tool = PDFPlumberTool(comparison_path)
-
-                extracted_text = pdf_tool.extract_text()
-                comparison_text = comparison_tool.extract_text()
-                summarized_text = summarize_pdf_content(extracted_text)
-
-                # AGENTS 및 TASKS 초기화
-                agents = Agents()
-                comparator_agent = agents.document_comparator(summarized_text, comparison_text)
-
-                # 작업 생성
-                tasks = Tasks()
-                compare_task = tasks.compare_with_selected_standard(comparator_agent)
-                final_summary_task = tasks.final_summary(comparator_agent, [compare_task])
-
-                # Crew 초기화
-                crew = Crew(
-                    agents=[comparator_agent],
-                    tasks=[compare_task, final_summary_task],
-                    verbose=2,
-                )
-
-                # 작업 수행
-                crew.kickoff()
-
-                # 최종 보고서 읽기
-                with open("final_summary_with_comparison.md", "r", encoding="utf-8") as file:
-                    final_summary = file.read()
-
-                st.session_state["final_summary"] = final_summary
-
-            st.write("최종 보고서:")
-            st.text(st.session_state["final_summary"])
-
-            # 다운로드 버튼 추가
-            st.download_button(
-                label="최종 보고서 다운로드 (Text)",
-                data=st.session_state["final_summary"],
-                file_name="final_summary_with_comparison.txt",
-                mime="text/plain"
-            )
-
-    st.success("작업이 완료되었습니다.")
+        st.success("요약 작업이 완료되었습니다.")
 
 if __name__ == "__main__":
     main()
