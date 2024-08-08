@@ -4,6 +4,9 @@ import pdfplumber
 from dotenv import load_dotenv
 from langchain.chat_models import ChatOpenAI
 
+# API 키 정보 로드
+load_dotenv()
+
 # Streamlit의 secrets.toml 파일에서 환경 변수를 가져옴
 openai_api_key = st.secrets["OPENAI_API_KEY"]
 openai_model_name = st.secrets["OPENAI_MODEL_NAME"]
