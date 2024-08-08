@@ -1,4 +1,4 @@
 streamlit
 pdfplumber
 langchain
-langchain-community  # langchain_community 모듈용
+langchain
