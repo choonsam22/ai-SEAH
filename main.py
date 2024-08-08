@@ -20,7 +20,7 @@ class PDFPlumberTool:
 # LLM을 사용해 PDF 내용을 정리하는 함수
 def summarize_pdf_content(pdf_text):
     llm = ChatOpenAI(
-        model_name="gpt-3.5-turbo",
+        model_name="gpt-4o-mini",
         temperature=0.1,
         max_tokens=1000,
     )
