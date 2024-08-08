@@ -1,6 +1,5 @@
 import streamlit as st
 import pdfplumber
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyMuPDFLoader
 from langchain.vectorstores import FAISS
 from langchain_core.output_parsers import StrOutputParser
